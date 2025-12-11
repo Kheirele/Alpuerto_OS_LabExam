@@ -13,9 +13,9 @@ Banker’s Algorithm (for deadlock avoidance)
 → Uses built‑in example matrices (no user input needed).
 → Automatically displays Need Matrix, Safe/Unsafe state, and Safe Sequence.
 
-======================================
+=====================================
 📌 How to Run the Program
-======================================
+=====================================
 - Make sure you have Python 3 installed.
 - Save the main.py file in a folder.
 - Open a terminal or command prompt inside that folder.
@@ -23,9 +23,9 @@ Banker’s Algorithm (for deadlock avoidance)
 Run:
 python main.py
 
-======================================
+=====================================
 📌 Input Format (Interactive)
-======================================
+=====================================
 When you run the program, it will ask for:
 
 - Number of processes
@@ -42,9 +42,9 @@ Choose scheduling algorithm:
 
 If you choose Round Robin, enter Time Quantum.
 
-======================================
+=====================================
 📌 Output Provided
-======================================
+=====================================
 For the chosen CPU scheduling algorithm, the program prints:
 
 - Gantt chart (text form)
@@ -58,9 +58,9 @@ Afterward, the program automatically runs Banker's Algorithm, showing:
 - Safe/Unsafe State
 - Safe Sequence (if safe)
 
-======================================
+=====================================
 📌 Algorithms Included
-======================================
+=====================================
 ✔ FCFS
 Runs processes in order of arrival.
 
@@ -75,18 +75,18 @@ Preemptive scheduling using time quantum
 Uses provided sample matrices
 Demonstrates system safety check
 
-======================================
+=====================================
 📌 Notes
-======================================
+=====================================
 This program handles integer inputs only.
 Processes are labelled automatically as P1, P2, P3, etc.
 
 The Gantt chart is printed in timestamp format:
 P1: 0 -> 5
 
-======================================
+=====================================
 SAMPLE RUN
-======================================
+=====================================
 Enter number of processes: 3
 Arrival time of P1: 0
 Burst time of P1: 5
