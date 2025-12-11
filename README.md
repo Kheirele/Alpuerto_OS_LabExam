@@ -88,16 +88,20 @@ P1: 0 -> 5
 SAMPLE RUN
 =====================================
 Enter number of processes: 3
-Arrival time of P1: 0
-Burst time of P1: 5
-Arrival time of P2: 1
-Burst time of P2: 3
-Arrival time of P3: 2
-Burst time of P3: 8
+- Arrival time of P1: 0
+- Burst time of P1: 5
+- Arrival time of P2: 1
+- Burst time of P2: 3
+- Arrival time of P3: 2
+- Burst time of P3: 8
 
 Choose algorithm:
+
 1 - FCFS
+
 2 - SJF (Non-Preemptive)
+
 3 - Round Robin
+
 Enter choice: 1
 
