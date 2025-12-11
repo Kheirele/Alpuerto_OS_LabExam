@@ -1,0 +1,234 @@
+# ============================================================
+#   CPU SCHEDULING + BANKER'S ALGORITHM (INTERACTIVE)
+#   FCFS, SJF (Non-Preemptive), Round Robin
+#   With comments explaining each step
+# ============================================================
+
+from collections import deque
+
+# ============================================================
+#   FCFS SCHEDULING
+# ============================================================
+def fcfs(processes):
+    # Sort by arrival time
+    processes.sort(key=lambda x: x["arrival"])
+    time = 0
+    timeline = []
+    waiting = {}
+    turnaround = {}
+
+    for p in processes:
+        start = max(time, p["arrival"])
+        end = start + p["burst"]
+
+        timeline.append((p["pid"], start, end))
+        waiting[p["pid"]] = start - p["arrival"]
+        turnaround[p["pid"]] = end - p["arrival"]
+
+        time = end
+
+    return timeline, waiting, turnaround
+
+
+# ============================================================
+#   SJF NON-PREEMPTIVE
+# ============================================================
+def sjf(processes):
+    processes = sorted(processes, key=lambda x: (x["arrival"], x["burst"]))
+    remaining = processes.copy()
+    time = 0
+    timeline = []
+    waiting = {}
+    turnaround = {}
+
+    while remaining:
+        available = [p for p in remaining if p["arrival"] <= time]
+
+        if not available:
+            time = min(remaining, key=lambda x: x["arrival"])["arrival"]
+            continue
+
+        p = min(available, key=lambda x: x["burst"])
+        start = time
+        end = start + p["burst"]
+
+        timeline.append((p["pid"], start, end))
+        waiting[p["pid"]] = start - p["arrival"]
+        turnaround[p["pid"]] = end - p["arrival"]
+
+        time = end
+        remaining.remove(p)
+
+    return timeline, waiting, turnaround
+
+
+# ============================================================
+#   ROUND ROBIN
+# ============================================================
+def round_robin(processes, tq):
+    queue = deque()
+    processes = sorted(processes, key=lambda x: x["arrival"])
+    rem = {p["pid"]: p["burst"] for p in processes}
+    time = processes[0]["arrival"]
+    idx = 0
+    timeline = []
+    finish = {}
+    n = len(processes)
+
+    # Push first arriving processes
+    while idx < n and processes[idx]["arrival"] <= time:
+        queue.append(processes[idx])
+        idx += 1
+
+    while queue:
+        p = queue.popleft()
+
+        start = time
+        run = min(tq, rem[p["pid"]])
+        time += run
+        rem[p["pid"]] -= run
+        timeline.append((p["pid"], start, time))
+
+        # Add new arrivals to queue
+        while idx < n and processes[idx]["arrival"] <= time:
+            queue.append(processes[idx])
+            idx += 1
+
+        # Put process back if not finished
+        if rem[p["pid"]] > 0:
+            queue.append(p)
+        else:
+            finish[p["pid"]] = time
+
+        # If queue empty but processes remain
+        if not queue and idx < n:
+            time = processes[idx]["arrival"]
+            queue.append(processes[idx])
+            idx += 1
+
+    waiting = {}
+    turnaround = {}
+    for p in processes:
+        turnaround[p["pid"]] = finish[p["pid"]] - p["arrival"]
+        waiting[p["pid"]] = turnaround[p["pid"]] - p["burst"]
+
+    return timeline, waiting, turnaround
+
+
+# ============================================================
+#   BANKER'S ALGORITHM (No Input Required)
+# ============================================================
+def bankers_algorithm():
+    allocation = {
+        'P0': [0, 1, 0],
+        'P1': [2, 0, 0],
+        'P2': [3, 0, 2],
+        'P3': [2, 1, 1],
+        'P4': [0, 0, 2],
+    }
+
+    maximum = {
+        'P0': [7, 5, 3],
+        'P1': [3, 2, 2],
+        'P2': [9, 0, 2],
+        'P3': [2, 2, 2],
+        'P4': [4, 3, 3],
+    }
+
+    available = [3, 3, 2]
+
+    need = []
+    for p in allocation:
+        need.append([
+            maximum[p][i] - allocation[p][i] for i in range(3)
+        ])
+
+    print("\n=============== BANKER'S ALGORITHM OUTPUT ===============")
+    print("NEED MATRIX:")
+    for i, p in enumerate(allocation):
+        print(f"{p}: {need[i]}")
+
+    # Safety check simulation
+    work = available.copy()
+    finish = {p: False for p in allocation}
+    safe_seq = []
+
+    while True:
+        found = False
+        for i, p in enumerate(allocation):
+            if not finish[p] and all(need[i][r] <= work[r] for r in range(3)):
+                for r in range(3):
+                    work[r] += allocation[p][r]
+                finish[p] = True
+                safe_seq.append(p)
+                found = True
+
+        if not found:
+            break
+
+    if all(finish.values()):
+        print("\nSAFE STATE!")
+        print("SAFE SEQUENCE:", " -> ".join(safe_seq))
+    else:
+        print("\nUNSAFE STATE!")
+
+    print("==========================================================")
+
+
+# ============================================================
+#   MAIN PROGRAM (INTERACTIVE INPUT)
+# ============================================================
+def main():
+    print("\n====== CPU SCHEDULING SIMULATOR ======\n")
+
+    n = int(input("Enter number of processes: "))
+
+    processes = []
+    for i in range(n):
+        pid = f"P{i+1}"
+        arrival = int(input(f"Arrival time of {pid}: "))
+        burst = int(input(f"Burst time of {pid}: "))
+        processes.append({"pid": pid, "arrival": arrival, "burst": burst})
+
+    print("\nChoose algorithm:")
+    print("1 - FCFS")
+    print("2 - SJF (Non-Preemptive)")
+    print("3 - Round Robin")
+
+    choice = int(input("Enter choice: "))
+
+    if choice == 1:
+        timeline, waiting, turnaround = fcfs(processes)
+        print("\n===== FCFS RESULTS =====")
+    elif choice == 2:
+        timeline, waiting, turnaround = sjf(processes)
+        print("\n===== SJF NON-PREEMPTIVE RESULTS =====")
+    elif choice == 3:
+        tq = int(input("Enter Time Quantum: "))
+        timeline, waiting, turnaround = round_robin(processes, tq)
+        print("\n===== ROUND ROBIN RESULTS =====")
+    else:
+        print("Invalid choice.")
+        return
+
+    # Print Gantt Chart
+    print("\nGANTT TIMELINE:")
+    for pid, start, end in timeline:
+        print(f"{pid}: {start} -> {end}")
+
+    print("\nWAITING TIMES:", waiting)
+    print("TURNAROUND TIMES:", turnaround)
+
+    avg_wt = sum(waiting.values()) / n
+    avg_tat = sum(turnaround.values()) / n
+
+    print(f"\nAverage Waiting Time: {avg_wt:.2f}")
+    print(f"Average Turnaround Time: {avg_tat:.2f}")
+
+    # Run Banker's Algorithm automatically
+    bankers_algorithm()
+
+
+# Run program
+if __name__ == "__main__":
+    main()
